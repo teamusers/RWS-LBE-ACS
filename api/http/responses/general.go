@@ -61,6 +61,9 @@ func UnsuccessfulUpdate() ApiResponse[any] {
 func NotFound() ApiResponse[any] {
 	return DefaultResponse(codes.NOT_FOUND, "not found")
 }
+func UnsuccessfullLoadingTemplate() ApiResponse[any] {
+	return DefaultResponse(codes.NOT_FOUND, "error while loading template")
+}
 
 type DomainErrorResponse struct {
 	// Error provides the error detail.
