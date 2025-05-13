@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <p>Hi {{ .email }},</p>
+    <p>Your OTP is <strong>{{ .otp }}</strong></p>
+
+    {{- if .rows }}
+        <h3>Instructions:</h3>
+        <ul>
+        {{- range .rows }}
+            <li><strong>{{ .label }}</strong>: {{ .value }}</li>
+        {{- end }}
+        </ul>
+    {{- end }}
+  </body>
+</html>
