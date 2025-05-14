@@ -16,7 +16,7 @@ func PlainText(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, responses.InvalidRequestBodyErrorResponse())
 		return
 	}
-	err := utils.SendEmail(sendEmailRequest.Email, sendEmailRequest.Subject, sendEmailRequest.PlainText, false)
+	err := utils.SendEmail(sendEmailRequest.Email, sendEmailRequest.Subject, sendEmailRequest.PlainText, false, sendEmailRequest.Attachments)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.InternalErrorResponse())
 		return
@@ -47,7 +47,7 @@ func EmailTemplate(c *gin.Context) {
 		return
 	}
 
-	err := utils.SendEmail(sendEmailRequest.Email, sendEmailRequest.Subject, content, true)
+	err := utils.SendEmail(sendEmailRequest.Email, sendEmailRequest.Subject, content, true, sendEmailRequest.Attachments)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.InternalErrorResponse())
 		return

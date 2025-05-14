@@ -32,7 +32,7 @@ func computeSignature(stringToSign, base64Key string) (string, error) {
 	return base64.StdEncoding.EncodeToString(mac.Sum(nil)), nil
 }
 
-func SendEmail(email string, subject string, emailData string, isHtml bool) error {
+func SendEmail(email string, subject string, emailData string, isHtml bool, attachments *[]map[string]string) error {
 	conn := os.Getenv("ACS_CONNECTION_STRING")
 	var (
 		endpoint, key string
@@ -67,6 +67,9 @@ func SendEmail(email string, subject string, emailData string, isHtml bool) erro
 		"recipients": map[string][]map[string]string{
 			"to": {{"address": email}},
 		},
+	}
+	if attachments != nil {
+		bodyObj["attachments"] = attachments
 	}
 	bodyBytes, _ := json.Marshal(bodyObj)
 
