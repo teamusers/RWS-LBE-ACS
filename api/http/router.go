@@ -16,5 +16,6 @@ func Routers(e *gin.RouterGroup) {
 	{
 		sendGroup.POST("/plain-text", send.PlainText)
 		sendGroup.POST("/template/:name", send.EmailTemplate)
+		sendGroup.POST("/sms", send.SMS)
 	}
 }
