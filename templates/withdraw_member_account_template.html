@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Withdrawal Confirmation</title>
+    <style>
+        .highlight {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 12px 0;
+            color: #d9534f;
+        }
+        .footer {
+            font-size: 14px;
+            color: #777777;
+            margin-top: 30px;
+        }
+        .footer a {
+            color: #1e73be;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Goodbye, {{.email}}</h2>
+    <p>Your account associated with the email <span class="highlight">{{.email}}</span> has been successfully withdrawn.</p>
+    <p>We're sorry to see you go. If you change your mind, you're always welcome back.</p>
+    <p>If this action was not initiated by you, please contact our support team immediately.</p>
+    <div class="footer">
+        <p>&copy; 2025 Your Company Name. All rights reserved.</p>
+        <p>If you have any questions, please feel free to <a href="mailto:support@example.com">contact support</a>.</p>
+    </div>
+</body>
+</html>

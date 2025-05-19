@@ -1,0 +1,384 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/v1/send/plain-text": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Sends a plain text email with the provided email, subject, plain text content, and optionally attachments.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "send"
+                ],
+                "summary": "Send a plain text email",
+                "parameters": [
+                    {
+                        "description": "Send email plain text body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.SendPlainTextEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email sent",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ApiResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/send/sms": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Sends sms to the given phone numbers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "send"
+                ],
+                "summary": "Sends sms",
+                "parameters": [
+                    {
+                        "description": "Send SMS request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.SendSMSRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "nil",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ApiResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid JSON request body",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized – API key missing or invalid",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth": {
+            "post": {
+                "description": "Validates AppID header and HMAC signature, then returns a JWT access token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Generate authentication token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "app1234",
+                        "description": "Client system AppID",
+                        "name": "AppID",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Authentication request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JWT access token returned successfully",
+                        "schema": {
+                            "$ref": "#/definitions/responses.AuthSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Malformed JSON in request body",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "HMAC signature mismatch",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected server error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/send/template/{name}": {
+            "post": {
+                "description": "Sends an email using the specified template and data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "send"
+                ],
+                "summary": "Send an email using a template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.SendTemplateEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email sent",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ApiResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "requests.AuthRequest": {
+            "type": "object",
+            "properties": {
+                "nonce": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.SendPlainTextEmailRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "plain_text",
+                "subject"
+            ],
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "plain_text": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.SendSMSRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "receivers"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "Your verification code is 123456"
+                },
+                "receivers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        6581234567,
+                        6581234568
+                    ]
+                }
+            }
+        },
+        "requests.SendTemplateEmailRequest": {
+            "type": "object",
+            "required": [
+                "data",
+                "email",
+                "subject"
+            ],
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "email": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.ApiResponse-any": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "Data holds the response payload. Its type depends on the endpoint:\ne.g. AuthResponse for /auth, LoginResponse for /user/login, etc."
+                },
+                "message": {
+                    "description": "Message provides a human‑readable status or result description.\nExample: \"user created\", \"email found\"",
+                    "type": "string"
+                }
+            }
+        },
+        "responses.AuthResponseData": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "AccessToken is the JWT issued to the client for subsequent requests.\nExample: \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "responses.AuthSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "in: body",
+                    "type": "integer",
+                    "example": 1000
+                },
+                "data": {
+                    "$ref": "#/definitions/responses.AuthResponseData"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "token successfully generated"
+                }
+            }
+        },
+        "responses.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Code is your internal API status code, e.g. 1002",
+                    "type": "integer",
+                    "example": 0
+                },
+                "data": {
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Message is a human‑readable description, e.g. \"invalid json request body\"",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

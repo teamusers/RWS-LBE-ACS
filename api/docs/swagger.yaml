@@ -1,0 +1,262 @@
+definitions:
+  requests.AuthRequest:
+    properties:
+      nonce:
+        type: string
+      signature:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  requests.SendPlainTextEmailRequest:
+    properties:
+      attachments:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+      email:
+        type: string
+      plain_text:
+        type: string
+      subject:
+        type: string
+    required:
+    - email
+    - plain_text
+    - subject
+    type: object
+  requests.SendSMSRequest:
+    properties:
+      content:
+        example: Your verification code is 123456
+        type: string
+      receivers:
+        example:
+        - 6581234567
+        - 6581234568
+        items:
+          type: integer
+        type: array
+    required:
+    - content
+    - receivers
+    type: object
+  requests.SendTemplateEmailRequest:
+    properties:
+      attachments:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+      data:
+        additionalProperties: true
+        type: object
+      email:
+        type: string
+      subject:
+        type: string
+    required:
+    - data
+    - email
+    - subject
+    type: object
+  responses.ApiResponse-any:
+    properties:
+      code:
+        type: integer
+      data:
+        description: |-
+          Data holds the response payload. Its type depends on the endpoint:
+          e.g. AuthResponse for /auth, LoginResponse for /user/login, etc.
+      message:
+        description: |-
+          Message provides a human‑readable status or result description.
+          Example: "user created", "email found"
+        type: string
+    type: object
+  responses.AuthResponseData:
+    properties:
+      access_token:
+        description: |-
+          AccessToken is the JWT issued to the client for subsequent requests.
+          Example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  responses.AuthSuccessResponse:
+    properties:
+      code:
+        description: 'in: body'
+        example: 1000
+        type: integer
+      data:
+        $ref: '#/definitions/responses.AuthResponseData'
+      message:
+        example: token successfully generated
+        type: string
+    type: object
+  responses.ErrorResponse:
+    properties:
+      code:
+        description: Code is your internal API status code, e.g. 1002
+        example: 0
+        type: integer
+      data:
+        type: string
+      message:
+        description: Message is a human‑readable description, e.g. "invalid json request
+          body"
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/send/plain-text:
+    post:
+      consumes:
+      - application/json
+      description: Sends a plain text email with the provided email, subject, plain
+        text content, and optionally attachments.
+      parameters:
+      - description: Send email plain text body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SendPlainTextEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email sent
+          schema:
+            $ref: '#/definitions/responses.ApiResponse-any'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Send a plain text email
+      tags:
+      - send
+  /api/v1/send/sms:
+    post:
+      consumes:
+      - application/json
+      description: Sends sms to the given phone numbers
+      parameters:
+      - description: Send SMS request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SendSMSRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: nil
+          schema:
+            $ref: '#/definitions/responses.ApiResponse-any'
+        "400":
+          description: Invalid JSON request body
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "401":
+          description: Unauthorized – API key missing or invalid
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Sends sms
+      tags:
+      - send
+  /auth:
+    post:
+      consumes:
+      - application/json
+      description: Validates AppID header and HMAC signature, then returns a JWT access
+        token.
+      parameters:
+      - default: app1234
+        description: Client system AppID
+        in: header
+        name: AppID
+        required: true
+        type: string
+      - description: Authentication request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/requests.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT access token returned successfully
+          schema:
+            $ref: '#/definitions/responses.AuthSuccessResponse'
+        "400":
+          description: Malformed JSON in request body
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "401":
+          description: HMAC signature mismatch
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Generate authentication token
+      tags:
+      - auth
+  /send/template/{name}:
+    post:
+      consumes:
+      - application/json
+      description: Sends an email using the specified template and data.
+      parameters:
+      - description: Template name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SendTemplateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email sent
+          schema:
+            $ref: '#/definitions/responses.ApiResponse-any'
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Send an email using a template
+      tags:
+      - send
+swagger: "2.0"

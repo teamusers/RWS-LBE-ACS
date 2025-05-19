@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	general "rlp-email-service/api/http"
 	"rlp-email-service/api/http/middleware"
@@ -11,6 +12,8 @@ import (
 	"rlp-email-service/system"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Option type and global slice for router modifications.
@@ -51,6 +54,27 @@ func Init() *gin.Engine {
 			"path":   route.Path,
 		})
 	}
+	r.Static("/docs", "./api/docs")
+
+	// wire up the swagger UI, telling it to fetch /docs/swagger.json
+	url := ginSwagger.URL("/docs/swagger.json")
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerFiles.Handler,
+		url,
+		// ⟵ hides the Models section
+		ginSwagger.DefaultModelsExpandDepth(-1),
+	))
+	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+
+	// redirect root to swagger
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/swagger/index.html")
+	})
+	// also catch bare /swagger
+	r.GET("/swagger", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/swagger/index.html")
+	})
 
 	r.Run(fmt.Sprintf(":%d", config.GetConfig().Http.Port))
 	return r
